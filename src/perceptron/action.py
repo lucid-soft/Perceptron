@@ -3,11 +3,11 @@ import time
 import logging
 import cv2
 import numpy as np
-import pyautogui
+import pydirectinput
 
 from src.perceptron.config import SMOOTH_MOUSE
 
-pyautogui.PAUSE = 0.05
+pydirectinput.PAUSE = 0.05
 log = logging.getLogger(__name__)
 
 class ActionLayer:
@@ -103,16 +103,16 @@ class ActionLayer:
 
             log.debug(f"Moving to ({global_x}, {global_y}) over {travel_time:.2f}s")
 
-            pyautogui.moveTo(
+            pydirectinput.moveTo(
                 global_x,
                 global_y,
                 duration=travel_time,
-                tween=pyautogui.easeInOutQuad,
+                tween=pydirectinput.easeInOutQuad,
             )
 
             time.sleep(random.uniform(0.04, 0.09))
-            pyautogui.click()
+            pydirectinput.click()
 
         else:
             log.debug(f"Instant click at ({global_x}, {global_y})")
-            pyautogui.click(global_x, global_y)
+            pydirectinput.click(global_x, global_y)
