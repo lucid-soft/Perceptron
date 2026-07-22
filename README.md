@@ -16,7 +16,7 @@ The included example policy automates combat against Hill Giants in Old School R
 - Humanized mouse movement and click selection
 - Segmentation mask-aware click targeting
 - Toggleable debug visualization
-
+- Toggleable stealth input capabilities using POST_MESSAGE win32gui API to avoid anti-cheat detection 
 ---
 
 ## How It Works
