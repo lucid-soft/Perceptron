@@ -35,6 +35,7 @@ def main():
     except Exception:
         log.exception("Fatal application error! (You most likely forgot to add the pre-trained model.)")
     finally:
+        action_layer.stop()
         keyboard.unhook_all()
 
     keyboard.unhook_all()

@@ -55,7 +55,10 @@ class HillGiantPolicy(BasePolicy):
             return
 
         log.debug(f"Acquired Giant ID: {target.id}. Clicking...")
-
+        # self.action_layer.hold_key("right", 500) # moves the camera right.
+                                                 # if the loop was longer than 500ms then it would let go after that
+                                                 # but here it would hold it continuously. you have to make it so your
+                                                 # loop doesn't call it more often than the duration of the hold
         self.action_layer.humanized_click(target)
 
         self.target_id = target.id
