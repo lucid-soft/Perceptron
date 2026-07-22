@@ -33,7 +33,16 @@ Each frame follows the same pipeline:
 
 ## Configuration
 
-Most settings can be changed in `config.py`.
+Most settings can be changed in `config.py` before you run Perceptron, including the vision model name, and whether you
+want to use POST_MESSAGE or Direct Input as the alternative
+
+---
+
+## Using Perceptron
+
+After cloning the repository, inserting your trained model, and updating config.py, you can simply open run.bat and it 
+will automatically install the required dependencies, if needed, and then run. You can also activate the virtual 
+environment and run ``python -m scripts/main.py``
 
 ---
 
