@@ -4,19 +4,20 @@ import logging
 
 log = logging.getLogger(__name__)
 
-ACTIVE_POLICY = "hill_giant"  # Simply change this string to swap bots
-COMBAT_COOLDOWN_SECONDS = 6.0
+ACTIVE_POLICY = "example_cv_only"  # Simply change this string to swap policies
 DEBUG_VIEW = True  # Shows debug view window when True
 SMOOTH_MOUSE = True # Whether to jump instantly or move smoothly to the target
 USE_POSTMESSAGE = True # Simulate native hardware input through win32 POSTMESSAGE, uses Direct Input otherwise
 CONFIDENCE_THRESHOLD = 0.02 # Using during training to temporarily allow for lower confidence to test model training
-WINDOW_NAME = "Runelite"
+OPENCV_MATCH_THRESHOLD = 0.80 # Confidence level, but for OpenCV detections
+WINDOW_NAME = "Runelite" # (Partial/Full) Name of the window you want to track, for finding window bounds
 TARGET_FPS = 7 # How many times per second the bot will update
 
-# Path to model
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent # Path to model
 MODEL_NAME = "example-seg.pt"   # Can also be in .onnx format as well
 MODEL_PATH = str(PROJECT_ROOT / "assets" / "models" / MODEL_NAME)
+IMAGE_PATH = PROJECT_ROOT / "assets" / "images"
 TRACKER_CONFIG = 'bytetrack.yaml' # Loaded automatically from source library, not contained in this project
 
 def get_game_bounds():

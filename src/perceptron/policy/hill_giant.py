@@ -1,12 +1,14 @@
 import time
 import logging
-from src.perceptron.config import COMBAT_COOLDOWN_SECONDS
 from .base import BasePolicy, BotState
 from .frame import FrameData
 
 log = logging.getLogger(__name__)
 
 class HillGiantPolicy(BasePolicy):
+    """Example policy that kills hill giants in runescape and nothing else."""
+    COMBAT_COOLDOWN_SECONDS = 6.0
+
     def __init__(self, action_layer, capture_area):
         super().__init__(action_layer, capture_area)
 
@@ -15,6 +17,8 @@ class HillGiantPolicy(BasePolicy):
             "hit_marker",
         ]
 
+        self.monitored_images = []
+        self.perception_mode = "yolo" # Can also use "both", or just "opencv"
         self.state = BotState.SEARCHING
         self.target_id = None
 
@@ -68,7 +72,7 @@ class HillGiantPolicy(BasePolicy):
 
         if (
                 frame.by_id(self.target_id) is None
-                or time_in_state > COMBAT_COOLDOWN_SECONDS
+                or time_in_state > self.COMBAT_COOLDOWN_SECONDS
         ):
             log.debug("Engage failed. Resetting.")
 

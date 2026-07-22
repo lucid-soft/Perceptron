@@ -15,6 +15,9 @@ class BasePolicy:
         self.center_y = capture_area["height"] // 2
 
         self.monitored_labels = []
+        self.monitored_images = []
+        # "yolo", "opencv", or "both"
+        self.perception_mode = "none" # doesn't load either by default, specify in policy init
 
     def process_frame_logic(self, active_detections):
         raise NotImplementedError(

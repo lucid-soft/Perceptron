@@ -3,19 +3,31 @@ import logging
 import cv2
 import mss
 import numpy as np
-from ultralytics import YOLO
-from src.perceptron.config import DEBUG_VIEW, MODEL_PATH, TARGET_FPS, CONFIDENCE_THRESHOLD
-from src.perceptron.detection import Detection
+from src.perceptron.config import DEBUG_VIEW, TARGET_FPS
+from src.perceptron.yolo_perception import YOLOPerceptionLayer
+from src.perceptron.opencv_perception import OpenCVPerceptionLayer
 
 log = logging.getLogger(__name__)
 
 class PerceptionLayer:
-    """Handles running the YOLO model and reporting detections to the policy layer."""
+    """Coordinates the YOLO and OpenCV perception layers."""
+
     def __init__(self, policy_layer):
         self.paused: bool = False
         self.policy_layer = policy_layer
-        self.model = YOLO(MODEL_PATH)
         self.running = False
+
+        self.yolo = (
+            YOLOPerceptionLayer(policy_layer)
+            if policy_layer.perception_mode in ("yolo", "both")
+            else None
+        )
+
+        self.opencv = (
+            OpenCVPerceptionLayer(policy_layer)
+            if policy_layer.perception_mode in ("opencv", "both")
+            else None
+        )
 
     def start_loop(self):
         self.running = True
@@ -37,54 +49,35 @@ class PerceptionLayer:
 
                     frame = np.array(screenshot)[:, :, :3]
 
-                    results = self.model.track(
-                        frame,
-                        persist=True,
-                        verbose=False,
-                        conf=CONFIDENCE_THRESHOLD
+                    active_detections = []
+                    annotated_frame = frame.copy()
+
+                    if self.yolo is not None:
+                        yolo_detections, results = self.yolo.detect(frame)
+
+                        active_detections.extend(yolo_detections)
+
+                        if DEBUG_VIEW:
+                            annotated_frame = self.yolo.annotate(
+                                results
+                            )
+
+                    if self.opencv is not None:
+                        opencv_detections = self.opencv.detect(frame)
+
+                        active_detections.extend(opencv_detections)
+
+                        if DEBUG_VIEW:
+                            annotated_frame = self.opencv.annotate(
+                                annotated_frame,
+                                opencv_detections
+                            )
+
+                    self.policy_layer.process_frame_logic(
+                        active_detections
                     )
 
-                    active_detections = []
-
-                    if results and results[0].boxes is not None:
-                        boxes = results[0].boxes
-                        masks = results[0].masks
-
-                        for idx, box in enumerate(boxes):
-                            x1, y1, x2, y2 = map(int, box.xyxy[0])
-
-                            center_x = (x1 + x2) // 2
-                            center_y = (y1 + y2) // 2
-
-                            cls_id = int(box.cls[0])
-                            label = self.model.names[cls_id]
-
-                            if box.id is not None:
-                                track_id = int(box.id[0])
-                            else:
-                                track_id = 1000 + idx
-
-                            mask_xy = (
-                                masks.xy[idx]
-                                if masks is not None
-                                else None
-                            )
-
-                            active_detections.append(
-                                Detection(
-                                    id=track_id,
-                                    label=label,
-                                    center=(center_x, center_y),
-                                    box=(x1, y1, x2, y2),
-                                    mask_xy=mask_xy,
-                                )
-                            )
-
-                    self.policy_layer.process_frame_logic(active_detections)
-
                     if DEBUG_VIEW:
-                        annotated_frame = results[0].plot()
-
                         cv2.imshow(
                             "Perceptron Debugger View",
                             annotated_frame,
