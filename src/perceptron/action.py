@@ -36,7 +36,7 @@ class ActionLayer:
             return
         start_x, start_y = win32api.GetCursorPos()
         if duration <= 0:
-            self.post_mouse_move(self.target_hwnd, x, y)
+            win32api.SetCursorPos((x, y))
             return
         steps = max(1, int(duration * 100))
         for i in range(1, steps + 1):
@@ -44,13 +44,7 @@ class ActionLayer:
             t = t * t * (3.0 - 2.0 * t)
             current_x, current_y = int(start_x + (x - start_x) * t), int(start_y + (y - start_y) * t)
             win32api.SetCursorPos((current_x, current_y))
-            self.post_mouse_move(self.target_hwnd, current_x, current_y)
             time.sleep(duration / steps)
-
-    def post_mouse_move(self, hwnd, screen_x, screen_y):
-        client_x, client_y = win32gui.ScreenToClient(hwnd, (int(screen_x), int(screen_y)))
-        lparam = win32api.MAKELONG(client_x & 0xFFFF, client_y & 0xFFFF)
-        win32gui.PostMessage(hwnd, win32con.WM_MOUSEMOVE, 0, lparam)
 
     def click(self, x, y):
         if USE_POSTMESSAGE:
