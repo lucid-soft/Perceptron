@@ -11,6 +11,7 @@ The included example policy automates combat against Hill Giants in Old School R
 ## Features
 
 - YOLO-based object detection
+- OpenCV image detection support
 - Persistent object tracking with ByteTrack
 - Policy-based behavior system
 - Humanized mouse movement and click selection
@@ -64,7 +65,14 @@ POLICIES = {
 }
 ```
 
-Then set it as the active policy in `config.py`.
+Then set it as the active policy in `config.py`. <br>
+Your policy must include in it's `__init__`:
+```python
+self.monitored_labels = [] # these are the names of your labels
+self.monitored_images = ["example", "example_2", "example_3"] # name of image in /assets/images/ without the .png
+self.perception_mode = "opencv" # it can be opencv, yolo, both, or none
+```
+```example_cv_only.py``` is an example of the most basic skeleton that only clicks an image.
 
 ---
 
@@ -73,7 +81,7 @@ Then set it as the active policy in `config.py`.
 - Python 3.11+
 - Windows 10/11
 
-A trained YOLO segmentation model is expected at (can also use .onnx format as well):
+A trained YOLO segmentation model is expected at (can also use .onnx format as well) if your policy uses yolo:
 
 ```
 assets/models/example-seg.pt 
@@ -84,7 +92,7 @@ assets/models/example-seg.pt
 
 ## Current Example
 
-The included policy demonstrates:
+The included hill_giant policy demonstrates:
 
 - locating the nearest Hill Giant
 - clicking a randomized point inside the segmentation mask
