@@ -8,6 +8,9 @@ ACTIVE_POLICY = "hill_giant"  # Simply change this string to swap bots
 COMBAT_COOLDOWN_SECONDS = 6.0
 DEBUG_VIEW = True  # Shows debug view window when True
 SMOOTH_MOUSE = True # Whether to jump instantly or move smoothly to the target
+USE_POSTMESSAGE = True # Simulate native hardware input through win32 POSTMESSAGE
+CONFIDENCE_THRESHOLD = 0.02 # Using during training to temporarily allow for lower confidence to test model training
+WINDOW_NAME = "Runelite"
 TARGET_FPS = 7 # How many times per second the bot will update
 
 # Path to model
@@ -18,7 +21,7 @@ TRACKER_CONFIG = 'bytetrack.yaml' # Loaded automatically from source library, no
 
 def get_game_bounds():
     try:
-        win = gw.getWindowsWithTitle('Runelite')[0] # Swap with 'RuneScape' if using official client
+        win = gw.getWindowsWithTitle(WINDOW_NAME)[0]
         return {
             "top": win.top + 180,       # Change the bounds to match your game window
             "left": win.left + 589,     # Debug mode can show you what's being recorded

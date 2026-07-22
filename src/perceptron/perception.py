@@ -4,7 +4,7 @@ import cv2
 import mss
 import numpy as np
 from ultralytics import YOLO
-from src.perceptron.config import DEBUG_VIEW, MODEL_PATH, TARGET_FPS
+from src.perceptron.config import DEBUG_VIEW, MODEL_PATH, TARGET_FPS, CONFIDENCE_THRESHOLD
 from src.perceptron.detection import Detection
 
 log = logging.getLogger(__name__)
@@ -41,6 +41,7 @@ class PerceptionLayer:
                         frame,
                         persist=True,
                         verbose=False,
+                        conf=CONFIDENCE_THRESHOLD
                     )
 
                     active_detections = []

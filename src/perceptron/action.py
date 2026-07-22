@@ -4,8 +4,11 @@ import logging
 import cv2
 import numpy as np
 import pydirectinput
+import win32gui
+import win32con
+import win32api
 
-from src.perceptron.config import SMOOTH_MOUSE
+from src.perceptron.config import SMOOTH_MOUSE, USE_POSTMESSAGE, WINDOW_NAME
 
 pydirectinput.PAUSE = 0.05
 log = logging.getLogger(__name__)
@@ -13,11 +16,60 @@ log = logging.getLogger(__name__)
 class ActionLayer:
     """Handles physical hardware interactions with humanization and safety bounds."""
 
-    def __init__(self, capture_area):
-        self.offset_x = capture_area["left"]
-        self.offset_y = capture_area["top"]
-        self.width = capture_area["width"]
-        self.height = capture_area["height"]
+    def find_window_partial(self, title):
+        data = {"title": title, "results": []}
+        win32gui.EnumWindows(enum_window_callback, data)
+        return data["results"][0][0] if data["results"] else None
+
+    def move_mouse(self, x, y, duration=0):
+        if USE_POSTMESSAGE:
+            self.move_postmessage(x, y, duration)
+        else:
+            self.move_pydirectinput(x, y, duration)
+
+    def move_pydirectinput(self, x, y, duration):
+        pydirectinput.moveTo(x, y, duration=duration, tween=pydirectinput.easeInOutQuad)
+
+    def move_postmessage(self, x, y, duration):
+        if not self.target_hwnd:
+            log.warning("Cannot use PostMessage: target_hwnd is not set.")
+            return
+        start_x, start_y = win32api.GetCursorPos()
+        if duration <= 0:
+            self.post_mouse_move(self.target_hwnd, x, y)
+            return
+        steps = max(1, int(duration * 100))
+        for i in range(1, steps + 1):
+            t = i / steps
+            t = t * t * (3.0 - 2.0 * t)
+            current_x, current_y = int(start_x + (x - start_x) * t), int(start_y + (y - start_y) * t)
+            win32api.SetCursorPos((current_x, current_y))
+            self.post_mouse_move(self.target_hwnd, current_x, current_y)
+            time.sleep(duration / steps)
+
+    def post_mouse_move(self, hwnd, screen_x, screen_y):
+        client_x, client_y = win32gui.ScreenToClient(hwnd, (int(screen_x), int(screen_y)))
+        lparam = win32api.MAKELONG(client_x & 0xFFFF, client_y & 0xFFFF)
+        win32gui.PostMessage(hwnd, win32con.WM_MOUSEMOVE, 0, lparam)
+
+    def click(self, x, y):
+        if USE_POSTMESSAGE:
+            self.click_postmessage(x, y)
+        else:
+            self.click_pydirectinput()
+
+    def click_pydirectinput(self):
+        pydirectinput.click()
+
+    def click_postmessage(self, x, y):
+        if not self.target_hwnd:
+            log.warning("Cannot use PostMessage: target_hwnd is not set.")
+            return
+        client_x, client_y = win32gui.ScreenToClient(self.target_hwnd, (int(x), int(y)))
+        lparam = win32api.MAKELONG(client_x & 0xFFFF, client_y & 0xFFFF)
+        win32gui.PostMessage(self.target_hwnd, win32con.WM_LBUTTONDOWN, win32con.MK_LBUTTON, lparam)
+        time.sleep(random.uniform(0.02, 0.06))
+        win32gui.PostMessage(self.target_hwnd, win32con.WM_LBUTTONUP, 0, lparam)
 
     def humanized_click(self, target):
         """Select a weighted random point inside an object's segmentation mask."""
@@ -100,19 +152,31 @@ class ActionLayer:
 
         if SMOOTH_MOUSE:
             travel_time = random.uniform(0.18, 0.38)
-
             log.debug(f"Moving to ({global_x}, {global_y}) over {travel_time:.2f}s")
-
-            pydirectinput.moveTo(
-                global_x,
-                global_y,
-                duration=travel_time,
-                tween=pydirectinput.easeInOutQuad,
-            )
-
-            time.sleep(random.uniform(0.04, 0.09))
-            pydirectinput.click()
+            self.move_mouse(global_x, global_y, travel_time)
+            time.sleep(random.uniform(0.04,0.09))
+            self.click(global_x, global_y)
 
         else:
             log.debug(f"Instant click at ({global_x}, {global_y})")
-            pydirectinput.click(global_x, global_y)
+            self.move_mouse(global_x, global_y, 0)
+            self.click(global_x, global_y)
+
+    def __init__(self, capture_area):
+        self.offset_x = capture_area["left"]
+        self.offset_y = capture_area["top"]
+        self.width = capture_area["width"]
+        self.height = capture_area["height"]
+        self.target_hwnd = self.find_window_partial(WINDOW_NAME) if USE_POSTMESSAGE else None
+
+        if USE_POSTMESSAGE and not self.target_hwnd:
+            raise RuntimeError(f"Could not find window containing title: {WINDOW_NAME}")
+
+def enum_window_callback(hwnd, matches):
+    if not win32gui.IsWindowVisible(hwnd):
+        return
+
+    window_title = win32gui.GetWindowText(hwnd)
+
+    if matches["title"].lower() in window_title.lower():
+        matches["results"].append((hwnd, window_title))
