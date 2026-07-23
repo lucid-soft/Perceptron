@@ -1,7 +1,8 @@
 import time
 import logging
-from .base import BasePolicy, BotState
-from .frame import FrameData
+from src.perceptron.policy.base import BasePolicy
+from src.perceptron.policy.frame import FrameData
+from enum import Enum, auto
 
 log = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ class HillGiantPolicy(BasePolicy):
             "hit_marker",
         ]
 
-        self.monitored_images = []
+        # self.monitored_images = [] <- Already initialized in base class so we don't need this line if we aren't using it
         self.perception_mode = "yolo" # Can also use "both", or just "opencv"
         self.state = BotState.SEARCHING
         self.target_id = None
@@ -122,3 +123,8 @@ class HillGiantPolicy(BasePolicy):
         log.debug(f"Hit registered on target {self.target_id}")
 
         return True
+
+class BotState(Enum):
+    SEARCHING = auto()
+    ENGAGING = auto()
+    COMBAT = auto()

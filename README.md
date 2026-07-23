@@ -11,7 +11,7 @@ The included example policy automates combat against Hill Giants in Old School R
 ## Features
 
 - YOLO-based object detection
-- OpenCV image detection support
+- OpenCV image detection support with template caching
 - Persistent object tracking with ByteTrack
 - Policy-based behavior system
 - Humanized mouse movement and click selection
@@ -49,7 +49,7 @@ environment and run ``python -m scripts/main.py``
 
 ## Adding a New Policy
 
-Create a new policy that inherits from `BasePolicy` and implement `process_frame_logic()`.
+Create a new policy that inherits from `BasePolicy` and implement `process_frame_logic()`. This is the main loop.
 
 ```python
 class MyPolicy(BasePolicy):
@@ -72,7 +72,8 @@ self.monitored_labels = [] # these are the names of your labels
 self.monitored_images = ["example", "example_2", "example_3"] # name of image in /assets/images/ without the .png
 self.perception_mode = "opencv" # it can be opencv, yolo, both, or none
 ```
-```example_cv_only.py``` is an example of the most basic skeleton that only clicks an image.
+```example_cv_only.py``` is an example of the most basic skeleton that only clicks an image. The perception layer will only 
+load opencv/yolo model that your policy is using, to reduce unecessary memory usage.
 
 ---
 

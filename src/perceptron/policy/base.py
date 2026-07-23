@@ -1,11 +1,3 @@
-from enum import Enum, auto
-
-class BotState(Enum):
-    SEARCHING = auto()
-    ENGAGING = auto()
-    COMBAT = auto()
-
-
 class BasePolicy:
     def __init__(self, action_layer, capture_area):
         self.action_layer = action_layer
@@ -17,7 +9,7 @@ class BasePolicy:
         self.monitored_labels = []
         self.monitored_images = []
         # "yolo", "opencv", or "both"
-        self.perception_mode = "none" # doesn't load either by default, specify in policy init
+        self.perception_mode = "none" # loads neither by default, specify in policy init
 
     def process_frame_logic(self, active_detections):
         raise NotImplementedError(

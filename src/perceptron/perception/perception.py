@@ -4,8 +4,8 @@ import cv2
 import mss
 import numpy as np
 from src.perceptron.config import DEBUG_VIEW, TARGET_FPS
-from src.perceptron.yolo_perception import YOLOPerceptionLayer
-from src.perceptron.opencv_perception import OpenCVPerceptionLayer
+from src.perceptron.perception.yolo_perception import YOLOPerceptionLayer
+from src.perceptron.perception.opencv_perception import OpenCVPerceptionLayer
 
 log = logging.getLogger(__name__)
 

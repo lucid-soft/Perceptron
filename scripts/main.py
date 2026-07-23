@@ -2,7 +2,7 @@ import logging
 import keyboard
 from src.perceptron.action.action import ActionLayer
 from src.perceptron.logging_config import configure_logging
-from src.perceptron.perception import PerceptionLayer
+from src.perceptron.perception.perception import PerceptionLayer
 from src.perceptron.config import CAPTURE_AREA, ACTIVE_POLICY, DEBUG_VIEW
 from src.perceptron.policy import POLICIES
 

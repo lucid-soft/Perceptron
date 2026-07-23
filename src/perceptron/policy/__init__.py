@@ -1,5 +1,5 @@
-from .example_cv_only import ExampleCVOnlyPolicy
-from .hill_giant import HillGiantPolicy
+from src.perceptron.policy.impl.example_cv_only import ExampleCVOnlyPolicy
+from src.perceptron.policy.impl.hill_giant import HillGiantPolicy
 
 POLICIES = {
     "example_cv_only": ExampleCVOnlyPolicy,
